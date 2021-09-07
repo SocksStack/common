@@ -23,6 +23,7 @@ type server struct {
 	Engine 	*gin.Engine
 	before 	constract.Callback
 	after 	constract.Callback
+	cfg		HttpConfig
 }
 
 func Default() *server {
@@ -74,7 +75,7 @@ func (s *server) Run(config constract.IHttpConfig)  {
 	}
 }
 
-func (s *server) Route(routes ...constract.Route) {
+func (s *server) Route(routes ...constract.Route) *server {
 	for _, item := range routes {
 		handler, ok := item.(contract.Handler)
 		if !ok {
@@ -82,9 +83,10 @@ func (s *server) Route(routes ...constract.Route) {
 		}
 		handler.Route(s.Engine)
 	}
+	return s
 }
 
-func (s *server) Middleware(middlewares ...constract.Middleware) {
+func (s *server) Middleware(middlewares ...constract.Middleware) *server {
 	for _, middleware := range middlewares {
 		m, ok := middleware.(gin.HandlerFunc)
 		if !ok {
@@ -92,8 +94,15 @@ func (s *server) Middleware(middlewares ...constract.Middleware) {
 		}
 		s.Engine.Use(m)
 	}
+	return s
 }
 
-func (s *server) SetMode(mode string) {
+func (s *server) SetConfig(cfg HttpConfig) *server {
+	s.cfg = cfg
+	return s
+}
+
+func (s *server) SetMode(mode string) *server {
 	gin.SetMode(mode)
+	return s
 }
