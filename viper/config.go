@@ -10,8 +10,7 @@ import (
 
 var Config = viper.New()
 
-func Init(path string) {
-	box := packr.NewBox(path)
+func Init(box packr.Box) {
 	configType := "yml"
 	defaultConfig, err := box.Find("default.yml")
 	if err != nil {
@@ -30,7 +29,7 @@ func Init(path string) {
 	}
 	// 在active配置中读取
 	active := Config.Get("active")
-	if active.(string) != "" {
+	if active != nil {
 		activeConfig, err := box.Find(fmt.Sprintf("%s.%s", active, configType))
 		if err != nil {
 			return
