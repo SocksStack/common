@@ -93,3 +93,7 @@ func (s *server) Middleware(middlewares ...constract.Middleware) {
 		s.Engine.Use(m)
 	}
 }
+
+func (s *server) SetMode(mode string) {
+	gin.SetMode(mode)
+}
