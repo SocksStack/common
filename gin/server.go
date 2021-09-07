@@ -26,18 +26,14 @@ type server struct {
 	cfg		HttpConfig
 }
 
-func Default() *server {
+func Default(mode string) *server {
+	gin.SetMode(mode)
 	HttpServer = new(server)
 	HttpServer.Engine = gin.Default()
 	return HttpServer
 }
 
-func (s *server) Run(config constract.IHttpConfig)  {
-	cfg, ok := config.(HttpConfig)
-	if !ok {
-		panic("请使用gin的配置")
-		return
-	}
+func (s *server) Run()  {
 	// 启动前操作
 	if s.before != nil {
 		s.before()
@@ -45,7 +41,7 @@ func (s *server) Run(config constract.IHttpConfig)  {
 
 	// gin 配置
 	srv := &http.Server{
-		Addr:    fmt.Sprintf("%s:%d", cfg.Host, cfg.Port),
+		Addr:    fmt.Sprintf("%s:%d", s.cfg.Host, s.cfg.Port),
 		Handler: s.Engine,
 	}
 
@@ -75,7 +71,7 @@ func (s *server) Run(config constract.IHttpConfig)  {
 	}
 }
 
-func (s *server) Route(routes ...constract.Route) *server {
+func (s *server) Route(routes ...constract.Route) constract.IServer {
 	for _, item := range routes {
 		handler, ok := item.(contract.Handler)
 		if !ok {
@@ -86,7 +82,7 @@ func (s *server) Route(routes ...constract.Route) *server {
 	return s
 }
 
-func (s *server) Middleware(middlewares ...constract.Middleware) *server {
+func (s *server) Use(middlewares ...constract.Middleware) constract.IServer {
 	for _, middleware := range middlewares {
 		m, ok := middleware.(gin.HandlerFunc)
 		if !ok {
@@ -97,12 +93,11 @@ func (s *server) Middleware(middlewares ...constract.Middleware) *server {
 	return s
 }
 
-func (s *server) SetConfig(cfg HttpConfig) *server {
-	s.cfg = cfg
-	return s
-}
-
-func (s *server) SetMode(mode string) *server {
-	gin.SetMode(mode)
+func (s *server) SetConfig(cfg constract.IHttpConfig) constract.IServer {
+	config, ok := cfg.(HttpConfig)
+	if !ok {
+		panic("gin 配置错误")
+	}
+	s.cfg = config
 	return s
 }

@@ -11,7 +11,8 @@ type Middleware interface{}
 type Middlewares []Middleware
 
 type IServer interface {
-	Run(config IHttpConfig)
-	Route(route ...Route)
-	Use(middleware ...Middleware)
+	Run()
+	Route(route ...Route) IServer
+	Use(middleware ...Middleware) IServer
+	SetConfig(config IHttpConfig) IServer
 }
