@@ -33,6 +33,13 @@ func Default(mode string) *server {
 	return HttpServer
 }
 
+func New(mode string) *server {
+	gin.SetMode(mode)
+	HttpServer = new(server)
+	HttpServer.Engine = gin.New()
+	return HttpServer
+}
+
 func (s *server) Run()  {
 	// 启动前操作
 	if s.before != nil {
@@ -100,4 +107,12 @@ func (s *server) SetConfig(cfg constract.IHttpConfig) constract.IServer {
 	}
 	s.cfg = config
 	return s
+}
+
+func (s *server) SetBefore(fn func(server *server))  {
+	fn(s)
+}
+
+func (s *server) SetAfter(fn func(server *server))  {
+	fn(s)
 }
